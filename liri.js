@@ -14,7 +14,7 @@ const twitterAccount = require('./keys.js');
 //==global variables==
 const errorText = chalk.red; //formatting for error text
 const command = process.argv[2]; //command
-const commandSearch = process.argv.slice(3).join(' '); //song or movie name
+var commandSearch = process.argv.slice(3).join(' '); //song or movie name
 
 //==Argument Parm Check==
 switch(command){
@@ -48,6 +48,7 @@ function myTweets(){
 	myAccount.get('statuses/home_timeline',{count: 20}, function(error, tweets, response){
 		if(error){
 			console.trace( errorText(error) );
+			return;
 		}
 
 		//console each tweet and created at timestamp
@@ -60,6 +61,35 @@ function myTweets(){
 
 
 function spotifySong(){
+
+	if(!commandSearch){
+		commandSearch = '"the sign"'; //default fallback song
+	}
+
+	spotify.search({ 
+		type: 'track', query: commandSearch}, function(err, data) {
+	    if ( err ) {
+	        console.trace(err);
+	        return;
+	    }
+
+	    if(data.tracks.items.length > 0){
+		    var artist = data.tracks.items[0].album.artists[0].name;
+		    var album = data.tracks.items[0].album.name;
+		    var song = data.tracks.items[0].name
+		    var externalURL = data.tracks.items[0].external_urls.spotify
+
+		    console.log(chalk.yellow('\nArtist:'), artist);
+		    console.log(chalk.yellow('Song:'), song);
+	    	console.log(chalk.yellow('Album:'), album);
+	    	console.log(chalk.yellow('Link:'), externalURL);
+	    }else{
+	    	console.log(errorText('Error! Nothing found for "' + commandSearch + '". Searching default song') );
+	   
+	    	commandSearch = undefined;
+	    	spotifySong();
+	    }
+	});
 
 }
 
