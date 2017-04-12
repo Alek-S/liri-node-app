@@ -108,13 +108,18 @@ function movieThis(){
 	}
 
 	request('http://www.omdbapi.com/?t=' + commandSearch, (err, response, body) => {
+		var formattedName = commandSearch;
+
 		if ( err ) {
 	        console.trace(err);
 	        return;
 	    }
 
 	    body = JSON.parse(body);
-	    let formattedName = commandSearch.replace(' ', '_').toLowerCase();
+		    
+	    while(formattedName.indexOf(' ') > 0){
+	    	formattedName = formattedName.replace(' ', '_').toLowerCase();
+		}
 
 	    if(body.Response === "True"){
 		    for (var i = 0; i < body.Ratings.length; i++) {
@@ -132,7 +137,9 @@ function movieThis(){
 	  		console.log(chalk.yellow('Plot:'), body.Plot);
 	  		console.log(chalk.yellow('Actors:'), body.Actors);
 	  		console.log(chalk.yellow('Rotten Tomatoes Rating:'), rottenRating);
-	  		console.log(chalk.yellow('Rotten Tomatoes URL:'), 'https://www.rottentomatoes.com/m/'+ formattedName);
+	  		console.log(chalk.yellow('Movie URL:'), body.Website);
+	  		checkRottenLink('https://www.rottentomatoes.com/m/'+ formattedName);
+
 	  	}else{
 	  		//if search returns nothing, show error, and run it again using default movie
 	    	console.log(errorText('Error! Nothing found for "' + commandSearch + '". Searching default movie') );
@@ -173,3 +180,24 @@ function showHelp(){
 	console.log(chalk.cyan('\ndo-what-it-says'));
 	console.log('└─ run command from random.txt');
 }
+
+
+//check if Rotten Tomatoes link is legit
+function checkRottenLink(link){
+	request(link, (err, response, body) => {
+		
+		if ( err ) {
+	        console.trace(err);
+	        return;
+	    }
+
+	    //check the body for a 404 error
+	    if(body.indexOf('<h1>404 - Not Found</h1>') > 0){
+	    	console.log(chalk.grey('Rotten Tomatoes URL could not be provided. This is usually indicative of non-unique film name.'));
+	    }else{
+	    	console.log(chalk.yellow('Rotten Tomatoes URL:'), link);
+	    }
+	});
+}
+
+
