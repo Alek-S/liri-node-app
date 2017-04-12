@@ -49,7 +49,7 @@ function myTweets(){
 	let myAccount = new Twitter(twitterAccount.twitterKeys);
 
 	//get last 20 tweets on timeline
-	myAccount.get('statuses/home_timeline',{count: 20}, function(error, tweets, response){
+	myAccount.get('statuses/home_timeline',{count: 20}, (error, tweets, response) => {
 		if(error){
 			console.trace( errorText(error) );
 			return;
@@ -71,7 +71,7 @@ function spotifySong(){
 	}
 
 	spotify.search({ 
-		type: 'track', query: commandSearch}, function(err, data) {
+		type: 'track', query: commandSearch}, (err, data) => {
 	    if ( err ) {
 	        console.trace(err);
 	        return;
@@ -107,7 +107,7 @@ function movieThis(){
 		commandSearch = commandSearch.replace('.', '');
 	}
 
-	request('http://www.omdbapi.com/?t=' + commandSearch, function (err, response, body) {
+	request('http://www.omdbapi.com/?t=' + commandSearch, (err, response, body) => {
 		if ( err ) {
 	        console.trace(err);
 	        return;
