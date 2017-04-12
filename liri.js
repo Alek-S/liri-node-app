@@ -1,20 +1,22 @@
 //==REQUIRE==
 const fs = require('fs');
-
 //npm
 const request = require('request');
 const spotify = require('spotify');
 const Twitter = require('twitter');
-const chalk = require('chalk'); //CLI text color and formatting
-
+const chalk = require('chalk'); //CLI text color
 //project specific
 const twitterAccount = require('./keys.js');
 
 
 //==global variables==
-const errorText = chalk.red; //formatting for error text
-const command = process.argv[2]; //command
-var commandSearch = process.argv.slice(3).join(' '); //song or movie name
+let errorText = chalk.red; //formatting for error text
+let command = process.argv[2]; //command
+let commandSearch = process.argv.slice(3).join(' '); //song or movie name
+
+
+
+
 
 //==Argument Parm Check==
 switch(command){
@@ -37,6 +39,8 @@ switch(command){
 	default:
 	showHelp();
 }
+
+
 
 
 //==FUNCTIONS==
@@ -84,6 +88,7 @@ function spotifySong(){
 	    	console.log(chalk.yellow('Album:'), album);
 	    	console.log(chalk.yellow('Link:'), externalURL);
 	    }else{
+	    	//if search returns nothing, show error, and run it again using default song
 	    	console.log(errorText('Error! Nothing found for "' + commandSearch + '". Searching default song') );
 	   
 	    	commandSearch = undefined;
@@ -95,6 +100,46 @@ function spotifySong(){
 
 
 function movieThis(){
+	
+	if(!commandSearch){
+		commandSearch = 'mr nobody'; //default fallback song
+	}else{
+		commandSearch = commandSearch.replace('.', '');
+	}
+
+	request('http://www.omdbapi.com/?t=' + commandSearch, function (err, response, body) {
+		if ( err ) {
+	        console.trace(err);
+	        return;
+	    }
+
+	    body = JSON.parse(body);
+	    let formattedName = commandSearch.replace(' ', '_').toLowerCase();
+
+	    if(body.Response === "True"){
+		    for (var i = 0; i < body.Ratings.length; i++) {
+		    	if(body.Ratings[i].Source === 'Rotten Tomatoes'){
+		    		var rottenRating = body.Ratings[i].Source;
+		    	}
+		    }
+
+
+	  		console.log(chalk.yellow('Title:'), body.Title);
+	  		console.log(chalk.yellow('Year:'), body.Year);
+	  		console.log(chalk.yellow('Rated:'), body.Rated);
+	  		console.log(chalk.yellow('Country:'), body.Country);
+	  		console.log(chalk.yellow('Language:'), body.Language);
+	  		console.log(chalk.yellow('Plot:'), body.Plot);
+	  		console.log(chalk.yellow('Actors:'), body.Actors);
+	  		console.log(chalk.yellow('Rotten Tomatoes Rating:'), rottenRating);
+	  		console.log(chalk.yellow('Rotten Tomatoes URL:'), 'https://www.rottentomatoes.com/m/'+ formattedName);
+	  	}else{
+	  		//if search returns nothing, show error, and run it again using default movie
+	    	console.log(errorText('Error! Nothing found for "' + commandSearch + '". Searching default movie') );
+	    	commandSearch = undefined;
+	    	movieThis();
+	  	}
+	});
 
 }
 
