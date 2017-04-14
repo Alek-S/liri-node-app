@@ -14,7 +14,8 @@ const twitterAccount = require('./keys.js');
 
 
 //==global variables==
-let errorText = chalk.red; //formatting for error text
+const inFile = './random.txt' //for do-what-it-says command
+const errorText = chalk.red; //formatting for error text
 let command = process.argv[2]; //command
 let commandSearch = process.argv.slice(3).join(' '); //song or movie name
 
@@ -22,26 +23,29 @@ let commandSearch = process.argv.slice(3).join(' '); //song or movie name
 
 
 //==Argument Parm Check==
-switch(command){
+commandCheck();
+function commandCheck(){
+	switch(command){
 
-	case 'my-tweets':
-		myTweets();
-		break;
+		case 'my-tweets':
+			myTweets();
+			break;
 
-	case 'spotify-this-song':
-		spotifySong();
-		break;
+		case 'spotify-this-song':
+			spotifySong();
+			break;
 
-	case 'movie-this':
-		movieThis();
-		break;
+		case 'movie-this':
+			movieThis();
+			break;
 
-	case 'do-what-it-says':
-		whatItSays();
-		break;
+		case 'do-what-it-says':
+			whatItSays();
+			break;
 
-	default:
-		showHelp();
+		default:
+			showHelp();
+	}
 }
 
 
@@ -157,7 +161,18 @@ function movieThis(){
 
 
 function whatItSays(){
+	let fileInArray = [];
 
+	console.log(chalk.yellow('Reading From:'), inFile);
+
+	fs.readFile(inFile, (err, data) => {
+		if (err) throw err;
+
+		fileInArray = data.toString().split(' ');
+		command = fileInArray[0];
+		commandSearch = fileInArray.slice(1).join(' ');
+		commandCheck();
+	});
 }
 
 
