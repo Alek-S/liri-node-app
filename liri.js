@@ -216,8 +216,10 @@ function showHelp(){
 	
 	if(process.argv[2] === undefined){
 		console.log( errorText('Error! No commands passed.') );
+		appendToLog('ERROR << Error! No commands passed.');
 	} else {
 		console.log( errorText('Error! "' + command + '" not a valid option') );
+		appendToLog('ERROR << Error! "' + command + '" not a valid option');
 	}
 
 	console.log('\n::Command Help::');
