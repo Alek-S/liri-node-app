@@ -10,11 +10,12 @@ const Twitter = require('twitter');
 const chalk = require('chalk'); //CLI text color
 
 //project specific
-const twitterAccount = require('./keys.js');
+const twitterAccount = require('./keys.js'); //part of .gitignore
 
 
-//==global variables==
-const inFile = './random.txt' //for do-what-it-says command
+//==GLOBAL VARIABLES==
+const inFile = './random.txt'; //for reading in do-what-it-says command
+const logFile = './log.txt'; //file used for logging --part of .gitignore
 const errorText = chalk.red; //formatting for error text
 let command = process.argv[2]; //command
 let commandSearch = process.argv.slice(3).join(' '); //song or movie name
@@ -25,6 +26,8 @@ let commandSearch = process.argv.slice(3).join(' '); //song or movie name
 //==Argument Parm Check==
 commandCheck();
 function commandCheck(){
+	appendToLog('COMMAND IN >> ' + command + '  ARG: ' + commandSearch );
+
 	switch(command){
 
 		case 'my-tweets':
@@ -67,6 +70,8 @@ function myTweets(){
 		tweets.forEach( (tweet) => {
 			console.log(chalk.yellow('\nTweet:'), tweet.text);
 			console.log(chalk.cyan('Created At:'), tweet.created_at);
+			appendToLog('OUTPUT << ' + tweet.text);
+			appendToLog('OUTPUT << ' + tweet.created_at);
 		});
 	});
 }
@@ -92,13 +97,22 @@ function spotifySong(){
 			let externalURL = data.tracks.items[0].external_urls.spotify;
 
 			console.log(chalk.yellow('\nArtist:'), artist);
+			appendToLog('OUTPUT << ' + 'Artist: ' + artist);
+
 			console.log(chalk.yellow('Song:'), song);
+			appendToLog('OUTPUT << ' + 'Song: ' + song);
+
 			console.log(chalk.yellow('Album:'), album);
+			appendToLog('OUTPUT << ' + 'Album: ' + album);
+
 			console.log(chalk.yellow('Link:'), externalURL);
+			appendToLog('OUTPUT << ' + 'Link: ' + externalURL);
+
 		}else{
 			//if search returns nothing, show error, and run it again using default song
 			console.log(errorText('Error! Nothing found for "' + commandSearch + '". Searching default song') );
- 
+			appendToLog('ERROR << Error! Nothing found for "' + commandSearch + '". Searching default song');
+
 			commandSearch = undefined;
 			spotifySong();
 		}
@@ -139,19 +153,39 @@ function movieThis(){
 
 
 			console.log(chalk.yellow('Title:'), body.Title);
+			appendToLog('OUTPUT << ' + 'Title: ' + body.Title);
+
 			console.log(chalk.yellow('Year:'), body.Year);
+			appendToLog('OUTPUT << ' + 'Year: ' + body.Year);
+
 			console.log(chalk.yellow('Rated:'), body.Rated);
+			appendToLog('OUTPUT << ' + 'Rated: ' + body.Rated);
+
 			console.log(chalk.yellow('Country:'), body.Country);
+			appendToLog('OUTPUT << ' + 'Country: ' + body.Country);
+
 			console.log(chalk.yellow('Language:'), body.Language);
+			appendToLog('OUTPUT << ' + 'Language: ' + body.Language);
+
 			console.log(chalk.yellow('Plot:'), body.Plot);
+			appendToLog('OUTPUT << ' + 'Plot: ' + body.Plot);
+
 			console.log(chalk.yellow('Actors:'), body.Actors);
+			appendToLog('OUTPUT << ' + 'Actors: ' + body.Actors);
+
 			console.log(chalk.yellow('Rotten Tomatoes Rating:'), rottenRating);
+			appendToLog('OUTPUT << ' + 'Rotten Tomatoes Rating: ' + rottenRating);
+
 			console.log(chalk.yellow('Movie URL:'), body.Website);
+			appendToLog('OUTPUT << ' + 'Movie URL: ' + body.Website);
+
 			checkRottenLink('https://www.rottentomatoes.com/m/'+ formattedName);
 
 		}else{
 			//if search returns nothing, show error, and run it again using default movie
 			console.log(errorText('Error! Nothing found for "' + commandSearch + '". Searching default movie') );
+			appendToLog('ERROR << Error! Nothing found for "' + commandSearch + '". Searching default movie');
+
 			commandSearch = undefined;
 			movieThis();
 		}
@@ -164,6 +198,7 @@ function whatItSays(){
 	let fileInArray = [];
 
 	console.log(chalk.yellow('Reading From:'), inFile);
+	appendToLog('OUTPUT << ' + 'Reading From: ' + inFile);
 
 	fs.readFile(inFile, (err, data) => {
 		if (err) throw err;
@@ -214,8 +249,22 @@ function checkRottenLink(link){
 		//check the body for a 404 error
 		if(body.indexOf('<h1>404 - Not Found</h1>') > 0){
 			console.log(chalk.grey('Rotten Tomatoes URL could not be provided. This is usually indicative of non-unique film name.'));
+			appendToLog('OUTPUT << ' + 'Rotten Tomatoes URL could not be provided. This is usually indicative of non-unique film name.');
 		}else{
 			console.log(chalk.yellow('Rotten Tomatoes URL:'), link);
+			appendToLog('OUTPUT << ' + 'Rotten Tomatoes URL: ' + link);
 		}
 	});
 }
+
+
+function appendToLog( toLog ){
+	let now = new Date();
+	
+	let logEntry = '\n'+ now +': ' + toLog;
+
+	fs.appendFile(logFile, logEntry, (err) => {
+		if (err) throw err;
+	});
+}
+
