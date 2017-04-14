@@ -2,11 +2,13 @@
 
 //==REQUIRE==
 const fs = require('fs');
+
 //npm
 const request = require('request');
 const spotify = require('spotify');
 const Twitter = require('twitter');
 const chalk = require('chalk'); //CLI text color
+
 //project specific
 const twitterAccount = require('./keys.js');
 
@@ -15,7 +17,6 @@ const twitterAccount = require('./keys.js');
 let errorText = chalk.red; //formatting for error text
 let command = process.argv[2]; //command
 let commandSearch = process.argv.slice(3).join(' '); //song or movie name
-
 
 
 
@@ -52,7 +53,7 @@ function myTweets(){
 	let myAccount = new Twitter(twitterAccount.twitterKeys);
 
 	//get last 20 tweets on timeline
-	myAccount.get('statuses/home_timeline',{count: 20}, (error, tweets, response) => {
+	myAccount.get('statuses/home_timeline',{count: 20}, (error, tweets) => {
 		if(error){
 			console.trace( errorText(error) );
 			return;
@@ -128,7 +129,7 @@ function movieThis(){
 		if(body.Response === 'True'){
 			for (let i = 0; i < body.Ratings.length; i++) {
 				if(body.Ratings[i].Source === 'Rotten Tomatoes'){
-					rottenRating = body.Ratings[i].Source;
+					rottenRating = body.Ratings[i].Value;
 				}
 			}
 
